@@ -1,16 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
-import { PlusCircle } from "@phosphor-icons/react";
+import { UserSwitch } from "@phosphor-icons/react";
 
-const transactionData = [];
+// const transactionData = [];
 
 export default function App() {
-  const [transactions, setTransactions] = useState(transactionData);
-  const [monthlyBudget, setMonthlyBudget] = useState(0);
-  const [balance, setbalance] = useState(0);
-  const [expense, setexpense] = useState(0);
+  const [transactions, setTransactions] = useState(function () {
+    const storedVal = localStorage.getItem("transactions");
+    return JSON.parse(storedVal) || [];
+  });
+
+  const [monthlyBudget, setMonthlyBudget] = useState(function () {
+    const storedVal = localStorage.getItem("monthlyBudget");
+    return JSON.parse(storedVal) || 0;
+  });
+
+  const [balance, setbalance] = useState(function () {
+    const storedVal = localStorage.getItem("balance");
+    return JSON.parse(storedVal) || 0;
+  });
+
+  const [expense, setexpense] = useState(function () {
+    const storedVal = localStorage.getItem("expense");
+    return JSON.parse(storedVal) || 0;
+  });
 
   const translen = transactions.length;
+
+  useEffect(
+    function () {
+      localStorage.setItem("transactions", JSON.stringify(transactions));
+    },
+    [transactions]
+  );
+
+  useEffect(
+    function () {
+      localStorage.setItem("monthlyBudget", JSON.stringify(monthlyBudget));
+    },
+    [monthlyBudget]
+  );
+
+  useEffect(
+    function () {
+      localStorage.setItem("balance", JSON.stringify(balance));
+    },
+    [balance]
+  );
+
+  useEffect(
+    function () {
+      localStorage.setItem("expense", JSON.stringify(expense));
+    },
+    [expense]
+  );
 
   function handleAddTranctions(transaction) {
     if (transaction.type === "expense") {
@@ -22,6 +65,14 @@ export default function App() {
     setTransactions([...transactions, transaction]);
   }
 
+  function handleReset() {
+    setMonthlyBudget(0);
+    setTransactions([]);
+    setbalance(0);
+    setexpense(0);
+    localStorage.clear();
+  }
+
   return (
     <div className="app">
       <h1>EXPENSE TRACKER</h1>
@@ -31,6 +82,7 @@ export default function App() {
         balance={balance - expense}
         monthlyBudget={monthlyBudget}
         expense={expense}
+        onReset={handleReset}
       />
       {translen > 0 && <ExpenseList transactions={transactions} />}
       {balance > 0 && (
@@ -46,6 +98,7 @@ function DashBoard({
   balance,
   monthlyBudget,
   expense,
+  onReset,
 }) {
   const [budget, setBudget] = useState(0);
 
@@ -64,8 +117,8 @@ function DashBoard({
             <p>
               {monthlyBudget === 0 ? "Set Monthly Budget" : "Monthly Budget"}
             </p>
-            <button>
-              <PlusCircle size={20} color="#4A55A2" weight="bold" />
+            <button onClick={onReset}>
+              <UserSwitch size={20} color="#4A55A2" weight="bold" />
             </button>
           </div>
 
